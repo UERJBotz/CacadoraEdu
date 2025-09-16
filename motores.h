@@ -15,14 +15,6 @@ void mover(int16_t esq, int16_t dir) {
     motor(roda_dir_m1, roda_dir_m2, dir);
 }
 
-//void motor(uint8_t m1, uint8_t m2, int16_t vel) {
-  //  if (vel < 0) {
-    //    digitalWrite(m1, abs(vel));
-      //  digitalWrite(m2, 0);
-    //} else {
-      //  digitalWrite(m1, 0);
-        //digitalWrite(m2, vel);
-   // }
 void motor(uint8_t m1, uint8_t m2, int16_t vel) {
     if (vel < 0) {
         analogWrite(m1, abs(vel));

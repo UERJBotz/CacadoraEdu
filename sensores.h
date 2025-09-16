@@ -15,3 +15,4 @@ bool dist_frente_esq(void) { return digitalRead(sensor_frente_esq); }
 bool dist_frente_dir(void) { return digitalRead(sensor_frente_dir); }
 bool dist_esq(void)        { return digitalRead(sensor_esq); }
 bool dist_dir(void)        { return digitalRead(sensor_dir); }
+
