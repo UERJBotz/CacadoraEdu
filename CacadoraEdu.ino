@@ -8,7 +8,7 @@
 SumoIR IR;
 
 enum simbolo {
-    NADA,
+    NADA = 0,
     FRENTE,
     ESQ,
     DIR,
@@ -16,14 +16,14 @@ enum simbolo {
     FRENTE_DIR,
 };
 enum estado {
-    G_DIR = 0,
-    RETO,
     G_ESQ,
     G_FRENTE_ESQ,
+    RETO,
     G_FRENTE_DIR,
+    G_DIR,
 };
 
-enum estado estado_atual = G_DIR;
+enum estado estado_atual;
 
 void setup() { 
     init_edu(9600);    
@@ -38,8 +38,9 @@ void loop() {
     mostra_sensores_no_led(sensores);
 
     if (IR.prepare()) { /* robô em preparação */
-        mover(0,0);
         Serial.println("Preparar");
+        estado_atual = G_DIR;
+        mover(0,0);
     } else if (IR.start()) {
         Serial.println("-> sumo start");
     }  else if (IR.on()) {
