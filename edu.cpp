@@ -3,11 +3,11 @@
 #if defined(INVERTER_MOTOR_DIR_ESQ)
     #define roda_esq_m1 18
     #define roda_esq_m2 19
-    #define roda_dir_m1 4
-    #define roda_dir_m2 23
+    #define roda_dir_m1 23
+    #define roda_dir_m2 4
 #else
-    #define roda_esq_m1 4
-    #define roda_esq_m2 23
+    #define roda_esq_m1 23
+    #define roda_esq_m2 4
     #define roda_dir_m1 18
     #define roda_dir_m2 19
 #endif
