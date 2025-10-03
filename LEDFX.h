@@ -8,6 +8,9 @@
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800); // necessario
 
 
+const auto azul  = pixels.Color(0,   0,   150);
+const auto verde = pixels.Color(150, 0,   0);
+
 void setar_cor_leds(uint8_t r, uint8_t g, uint8_t b) {
   for (uint8_t i = 0; i < NUMPIXELS; i++) {
     pixels.setPixelColor(i, pixels.Color(r, g, b));
@@ -17,13 +20,16 @@ void setar_cor_leds(uint8_t r, uint8_t g, uint8_t b) {
 void mostra_sensores_no_led(struct leitura leitura) {
   setar_cor_leds(3, 5, 3); // Define a cor padrão para todos os LEDs
 
-  const auto azul = pixels.Color(0,   0,   150);
-  
   if (leitura.esq)        pixels.setPixelColor(5, azul);
   if (leitura.frente_esq) pixels.setPixelColor(4, azul);
   if (leitura.frente_dir) pixels.setPixelColor(3, azul);
   if (leitura.dir)        pixels.setPixelColor(2, azul);
 
+  pixels.show();
+}
+void mostra_estrategia_no_led(int num_estrategia) {
+  setar_cor_leds(3, 5, 3);
+  for (uint8_t i = 0; i < (num_estrategia - 3); i++) pixels.setPixelColor(i, verde);
   pixels.show();
 }
 
