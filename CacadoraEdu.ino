@@ -22,14 +22,21 @@ enum estado {
     G_FRENTE_DIR,
     G_DIR,
 };
+enum estrategia {
+    PIAO = 4,
+    MADMAX = 5,
+    MADMAX_ESQUERDA = 6,
+};
 
 enum estado estado_atual;
+enum estrategia estrategia = PIAO;
 
 void setup() { 
-    init_edu(9600);    
+    init_edu(9600);
     IR.begin(PINO_IR);
     IR.setLed(2,HIGH,180);
 }
+
 
 void loop() {  
     IR.update();
@@ -37,13 +44,23 @@ void loop() {
     struct leitura sensores = leitura_sensores();
     mostra_sensores_no_led(sensores);
 
+    if (IR.available()) { /* quando o sensor tiver ativado */
+        int cmd = IR.read(); // salva o número lido pelo sensor, estando ou não de 1 a 3
+        if (cmd >= 4 && cmd <= 9) {
+            estrategia = (enum estrategia)cmd; // substitui a estratégia atual por esse número
+            mover(0,0); mostra_estrategia_no_led(estrategia); delay(100);
+        }
+    }
+
     if (IR.prepare()) { /* robô em preparação */
         Serial.println("Preparar");
         estado_atual = G_DIR;
         mover(0,0);
+
     } else if (IR.start()) {
         Serial.println("-> sumo start");
-    }  else if (IR.on()) {
+
+    } else if (IR.on()) {
         enum simbolo simb;
 
         // retorna o símbolo adequado de acordo com os sensores
@@ -55,32 +72,23 @@ void loop() {
         else if (sensores.frente_dir) simb = FRENTE_DIR;
         else                          simb = NADA;
 
-        //Atualiza o estado da máquina
-        estado_atual = prox_estado(estado_atual, simb);
+        switch (estrategia) {
+            case PIAO: {
+                estado_atual = prox_estado(estado_atual, simb);
+                acao_atual(estado_atual);
+            } break;
 
-        // Executa ação de acordo com o estado
-        switch (estado_atual) {
-            case RETO: {
-                Serial.println("EMPURRANDO");
-                mover(1023,1023);
+            case MADMAX: { 
+                Serial.println("FAZENDO MADMAX");
+                mover(1023, 1023);
+                //mostra_estrategia_no_led(9);
             } break;
-            case G_ESQ: {
-                Serial.println("GIRANDO PRA ESQUERDA");
-                mover(-600,600);
-            } break;
-            case G_FRENTE_ESQ: {
-                Serial.println("GIRANDO LEVE PARA ESQUERDA");
-                mover(900, 1023);
-            } break;
-            case G_FRENTE_DIR: {
-                Serial.println("GIRANDO LEVE PARA DIREITA");
-                mover(1023, 900);
-            } break;
-            case G_DIR: {
-                Serial.println("GIRANDO PRA DIREITA");
-                mover(200,-200);
+            case MADMAX_ESQUERDA: {
+                mover(-1023, 1023);
+                mostra_estrategia_no_led(9);
             } break;
         }
+
     } else if (IR.stop()){
         Serial.println("-> sumo stop");
         mover(0,0);
@@ -118,7 +126,7 @@ estado prox_estado(estado e, simbolo s) {
                 case NADA:       return G_ESQ;
             } break;
         case G_FRENTE_ESQ:
-            switch(s){
+            switch(s) {
                 case FRENTE:     return RETO;
                 case ESQ:        return G_ESQ;
                 case FRENTE_ESQ: return G_FRENTE_ESQ;
@@ -127,7 +135,7 @@ estado prox_estado(estado e, simbolo s) {
                 case NADA:       return G_ESQ;
             } break;
         case G_FRENTE_DIR:
-            switch(s){
+            switch(s) {
                 case FRENTE:     return RETO;
                 case ESQ:        return G_ESQ;
                 case FRENTE_ESQ: return G_FRENTE_ESQ;
@@ -138,5 +146,30 @@ estado prox_estado(estado e, simbolo s) {
     }
 
     return e; // valor padrão de segurança
+}
+
+void acao_atual(estado e) {
+    switch (e) {
+        case RETO: {
+            Serial.println("EMPURRANDO");
+            mover(1023,1023);
+        } break;
+        case G_ESQ: {
+            Serial.println("GIRANDO PRA ESQUERDA");
+            mover(-600,600);
+        } break;
+        case G_FRENTE_ESQ: {
+            Serial.println("GIRANDO LEVE PARA ESQUERDA");
+            mover(900, 1023);
+        } break;
+        case G_FRENTE_DIR: {
+            Serial.println("GIRANDO LEVE PARA DIREITA");
+            mover(1023, 900);
+        } break;
+        case G_DIR: {
+            Serial.println("GIRANDO PRA DIREITA");
+            mover(200,-200);
+        } break;
+    }
 }
    
