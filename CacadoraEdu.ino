@@ -24,8 +24,8 @@ enum estado {
 };
 enum estrategia {
     PIAO = 4,
-    MADMAX = 5,
-    MADMAX_ESQUERDA = 6,
+    ZIGZAG = 6,
+    MADMAX = 9,
 };
 
 enum estado estado_atual;
@@ -81,11 +81,10 @@ void loop() {
             case MADMAX: { 
                 Serial.println("FAZENDO MADMAX");
                 mover(1023, 1023);
-                //mostra_estrategia_no_led(9);
             } break;
-            case MADMAX_ESQUERDA: {
-                mover(-1023, 1023);
-                mostra_estrategia_no_led(9);
+
+            case ZIGZAG: {
+                //! implementar
             } break;
         }
 
@@ -148,6 +147,7 @@ estado prox_estado(estado e, simbolo s) {
     return e; // valor padrão de segurança
 }
 
+
 void acao_atual(estado e) {
     switch (e) {
         case RETO: {
@@ -172,4 +172,3 @@ void acao_atual(estado e) {
         } break;
     }
 }
-   
