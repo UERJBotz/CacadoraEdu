@@ -1,5 +1,3 @@
-//! ver se os sensores da esquerda estão na direita e vice versa (incluindo frente)(acho que tão)
-
 #include "edu.h"
 #include "SumoIR.h"
 #include "LEDFX.h"
@@ -15,21 +13,28 @@ enum simbolo {
     FRENTE_ESQ,
     FRENTE_DIR,
 };
-enum estado {
-    G_ESQ,
-    G_FRENTE_ESQ,
-    RETO,
-    G_FRENTE_DIR,
-    G_DIR,
-};
+
 enum estrategia {
     PIAO = 4,
     ZIGZAG = 6,
     MADMAX = 9,
 };
 
-enum estado estado_atual;
+enum piao {
+    G_ESQ,
+    G_FRENTE_ESQ,
+    RETO,
+    G_FRENTE_DIR,
+    G_DIR,
+};
+enum zig_zag {
+    Z_ZERO,
+    Z_UM,
+};
+
+
 enum estrategia estrategia = PIAO;
+unsigned long t0_zig_zag = 0;
 
 void setup() { 
     init_edu(9600);
@@ -54,28 +59,19 @@ void loop() {
 
     if (IR.prepare()) { /* robô em preparação */
         Serial.println("Preparar");
-        estado_atual = G_DIR;
         mover(0,0);
 
     } else if (IR.start()) {
         Serial.println("-> sumo start");
 
     } else if (IR.on()) {
-        enum simbolo simb;
-
-        // retorna o símbolo adequado de acordo com os sensores
-        if      (sensores.frente_esq &&
-                 sensores.frente_dir) simb = FRENTE;
-        else if (sensores.esq)        simb = ESQ;
-        else if (sensores.dir)        simb = DIR;
-        else if (sensores.frente_esq) simb = FRENTE_ESQ;
-        else if (sensores.frente_dir) simb = FRENTE_DIR;
-        else                          simb = NADA;
-
+        enum simbolo simb = prox_simbolo(sensores);
         switch (estrategia) {
             case PIAO: {
-                estado_atual = prox_estado(estado_atual, simb);
-                acao_atual(estado_atual);
+                static enum piao estado = G_DIR;
+
+                estado = prox_piao(estado, simb);
+                acao_piao(estado);
             } break;
 
             case MADMAX: { 
@@ -84,7 +80,16 @@ void loop() {
             } break;
 
             case ZIGZAG: {
-                //! implementar
+                static enum zig_zag estado = Z_ZERO;
+
+                estado = prox_zig_zag(estado, simb);
+                acao_zig_zag(estado);
+            } break;
+
+            default: {
+                static enum piao estado = G_DIR;
+                estado = prox_piao(estado,simb);
+                acao_piao(estado);
             } break;
         }
 
@@ -95,7 +100,7 @@ void loop() {
 }
 
 // Define os próximos estados com base no estado atual e símbolo lido
-estado prox_estado(estado e, simbolo s) {
+enum piao prox_piao(enum piao e, enum simbolo s) {
     switch (e) {
         case G_DIR:
             switch (s) {
@@ -148,7 +153,16 @@ estado prox_estado(estado e, simbolo s) {
 }
 
 
-void acao_atual(estado e) {
+enum zig_zag prox_zig_zag(enum zig_zag e, enum simbolo s) {
+    switch (e) {
+        case Z_ZERO: t0_zig_zag = millis();
+        case Z_UM: return Z_UM;
+    }
+    return e;
+}
+
+
+void acao_piao(enum piao e) {
     switch (e) {
         case RETO: {
             Serial.println("EMPURRANDO");
@@ -171,4 +185,36 @@ void acao_atual(estado e) {
             mover(200,-200);
         } break;
     }
+}
+
+void acao_zig_zag(enum zig_zag e) {
+    const unsigned long dt = millis() - t0_zig_zag;
+    if (dt < 1000) {
+        Serial.println("GIRANDO PRA ESQUERDA");
+        mover(-600,600);
+    } else if (dt < 3000) {
+        Serial.println("ANDANDO RETO");
+        mover(1023,1023);
+    } else if (dt < 4000) {
+        Serial.println("GIRANDO PRA DIREITA");
+        mover(200,-200);
+    } else if (dt < 6000) {
+        Serial.println("ANDANDO RETO");
+        mover(1023,1023);
+    } else {
+        Serial.println("PARANDO");
+        mover(0,0);
+    }
+}
+
+enum simbolo prox_simbolo(struct leitura sensores) {
+    if (sensores.frente_esq &&
+        sensores.frente_dir) return FRENTE;     else
+    if (sensores.esq)        return ESQ;        else
+    if (sensores.dir)        return DIR;        else
+    if (sensores.frente_esq) return FRENTE_ESQ; else
+    if (sensores.frente_dir) return FRENTE_DIR; else
+
+    return NADA;
+
 }
