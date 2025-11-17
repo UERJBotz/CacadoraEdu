@@ -1,29 +1,17 @@
 #include <Arduino.h>
 
-#if defined(INVERTER_MOTOR_DIR_ESQ)
-    #define roda_esq_m1 19
-    #define roda_esq_m2 18
-    #define roda_dir_m1 4
-    #define roda_dir_m2 23
-#else
-    #define roda_esq_m1 4
-    #define roda_esq_m2 23
-    #define roda_dir_m1 19
-    #define roda_dir_m2 18
-#endif
+#include "placa.h"
+
+#define roda_esq_m1 MA1
+#define roda_esq_m2 MA2
+#define roda_dir_m1 MB2
+#define roda_dir_m2 MB1
 #include "motores.h"
 
-#if defined(INVERTER_SENSOR_DIR_ESQ)
-    #define sensor_esq 32
-    #define sensor_dir 27
-    #define sensor_frente_esq 26
-    #define sensor_frente_dir 33
-#else
-    #define sensor_esq 27
-    #define sensor_dir 32
-    #define sensor_frente_esq 33
-    #define sensor_frente_dir 26
-#endif
+#define sensor_esq BTN2
+#define sensor_dir S8
+#define sensor_frente_esq S5
+#define sensor_frente_dir S4
 #include "sensores.h"
 
 void init_edu(unsigned int baud = 9600) {

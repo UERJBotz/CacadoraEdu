@@ -43,14 +43,16 @@ void setup() {
 }
 
 
-void loop() {  
-    IR.update();
+void loop() {
+    static bool resetar = true;
 
     struct leitura sensores = leitura_sensores();
     mostra_sensores_no_led(sensores);
 
+    IR.update();
     if (IR.available()) { /* quando o sensor tiver ativado */
         int cmd = IR.read(); // salva o número lido pelo sensor, estando ou não de 1 a 3
+        if (cmd == 3) resetar = true;
         if (cmd >= 4 && cmd <= 9) {
             estrategia = (enum estrategia)cmd; // substitui a estratégia atual por esse número
             mover(0,0); mostra_estrategia_no_led(estrategia); delay(100);
@@ -67,8 +69,10 @@ void loop() {
     } else if (IR.on()) {
         enum simbolo simb = prox_simbolo(sensores);
         switch (estrategia) {
+            default:
             case PIAO: {
-                static enum piao estado = G_DIR;
+                static enum piao estado;
+                if (resetar) estado = G_DIR;
 
                 estado = prox_piao(estado, simb);
                 acao_piao(estado);
@@ -80,19 +84,14 @@ void loop() {
             } break;
 
             case ZIGZAG: {
-                static enum zig_zag estado = Z_ZERO;
+                static enum zig_zag estado;
+                if (resetar) estado = Z_ZERO;
 
                 estado = prox_zig_zag(estado, simb);
                 acao_zig_zag(estado);
             } break;
-
-            default: {
-                static enum piao estado = G_DIR;
-                estado = prox_piao(estado,simb);
-                acao_piao(estado);
-            } break;
         }
-
+        resetar = false;
     } else if (IR.stop()){
         Serial.println("-> sumo stop");
         mover(0,0);
@@ -189,18 +188,21 @@ void acao_piao(enum piao e) {
 
 void acao_zig_zag(enum zig_zag e) {
     const unsigned long dt = millis() - t0_zig_zag;
-    if (dt < 1000) {
+    const int16_t vel = 700, vel_max = 1023;
+
+    unsigned long t = 0;
+    if        (dt < (t += 120)) {
         Serial.println("GIRANDO PRA ESQUERDA");
-        mover(-600,600);
-    } else if (dt < 3000) {
+        mover(-vel,vel);
+    } else if (dt < (t += 300)) {
         Serial.println("ANDANDO RETO");
-        mover(1023,1023);
-    } else if (dt < 4000) {
+        mover(vel_max,vel_max);
+    } else if (dt < (t += 120)) {
         Serial.println("GIRANDO PRA DIREITA");
-        mover(200,-200);
-    } else if (dt < 6000) {
+        mover(vel,-vel);
+    } else if (dt < (t += 300)) {
         Serial.println("ANDANDO RETO");
-        mover(1023,1023);
+        mover(vel_max,vel_max);
     } else {
         Serial.println("PARANDO");
         mover(0,0);
@@ -216,5 +218,4 @@ enum simbolo prox_simbolo(struct leitura sensores) {
     if (sensores.frente_dir) return FRENTE_DIR; else
 
     return NADA;
-
 }
