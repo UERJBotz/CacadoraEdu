@@ -32,6 +32,7 @@ enum zig_zag {
   Z_UM,
   Z_DOIS,
   Z_TRES,
+  Z_QUATRO,
 };
 
 
@@ -162,32 +163,36 @@ enum piao prox_piao(enum piao e, enum simbolo s) {
 
 enum zig_zag prox_zig_zag(enum zig_zag e, enum simbolo s) {
   const unsigned long dt = millis() - t0_zig_zag;
-  unsigned long t = 0;
   switch (e) {
-        case Z_ZERO:
-            if (dt < (t += 120)) return e;
-            else {
-                t0_zig_zag = millis();
-                return Z_UM;
-            }
-        case Z_UM:
-            if (dt < (t += 300)) return e;
-            else {
-                t0_zig_zag = millis();
-                return Z_DOIS;
-            }
-        case Z_DOIS:
-            if (dt < (t += 120)) return e;
-            else {
-                t0_zig_zag = millis();
-                return Z_TRES;
-            }
-        case Z_TRES:
-            if (dt < (t += 300)) return e;
-            else {
-                t0_zig_zag = millis();
-                return Z_UM;
-            }
+      case Z_ZERO:
+          {
+              t0_zig_zag = millis();
+              return Z_UM;
+          }
+      case Z_UM:
+          if (dt < 120) return e;
+          else {
+              t0_zig_zag = millis();
+              return Z_DOIS;
+          }
+      case Z_DOIS:
+          if (dt < 120) return e;
+          else {
+              t0_zig_zag = millis();
+              return Z_TRES;
+          }
+      case Z_TRES:
+          if (dt < 120) return e;
+          else {
+              t0_zig_zag = millis();
+              return Z_QUATRO;
+          }
+      case Z_QUATRO:
+          if (dt < 120) return e;
+          else {
+              t0_zig_zag = millis();
+              return Z_ZERO;
+          }
   }
   return e;
 }
@@ -226,23 +231,23 @@ void acao_zig_zag(enum zig_zag e) {
   const int16_t vel = 200, vel_max = 500;
 
   switch (e) {
-    case Z_ZERO:{
+    case Z_ZERO: break;
+    case Z_UM: {
         Serial.println("GIRANDO PRA ESQUERDA");
         mover(-vel, vel);
       } break;
-    case Z_UM:  {
+    case Z_DOIS: {
         Serial.println("ANDANDO RETO");
         mover(vel_max, vel_max);
       } break;
-    case Z_DOIS: {
+    case Z_TRES: {
         Serial.println("GIRANDO PRA DIREITA");
         mover(vel, -vel);
       } break;
-    case Z_TRES:{
+    case Z_QUATRO: {
         Serial.println("ANDANDO RETO");
         mover(vel_max, vel_max);
-      } break;
-    
+      } break; 
   }
 }
 
