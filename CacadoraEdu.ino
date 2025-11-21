@@ -78,7 +78,6 @@ void loop() {
       case PIAO: {
         static enum piao estado;
         if (resetar) estado = G_DIR;
-
         estado = prox_piao(estado, simb);
         acao_piao(estado);
       } break;
@@ -91,7 +90,6 @@ void loop() {
       case ZIGZAG: {
         static enum zig_zag estado;
         if (resetar) estado = Z_ZERO;
-
         estado = prox_zig_zag(estado, simb);
         acao_zig_zag(estado);
       } break;
@@ -110,20 +108,20 @@ enum piao prox_piao(enum piao e, enum simbolo s) {
     case G_DIR:
       switch (s) {
         case FRENTE:         return RETO;
-        case ESQ:            return G_ESQ;
-        case FRENTE_ESQ:     return G_FRENTE_ESQ;
-        case FRENTE_DIR:     return G_FRENTE_DIR;
         case DIR:            return G_DIR;
+        case FRENTE_DIR:     return G_FRENTE_DIR;
+        case FRENTE_ESQ:     return G_FRENTE_ESQ;
+        case ESQ:            return G_ESQ;
         case NADA:           return G_DIR;
       }break;
 
     case RETO:
       switch (s) {
         case FRENTE:         return RETO;
-        case ESQ:            return G_ESQ;
-        case FRENTE_ESQ:     return G_FRENTE_ESQ;
-        case FRENTE_DIR:     return G_FRENTE_DIR;
         case DIR:            return G_DIR;
+        case FRENTE_DIR:     return G_FRENTE_DIR;
+        case FRENTE_ESQ:     return G_FRENTE_ESQ;
+        case ESQ:            return G_ESQ;
         case NADA:           return G_DIR;
       }break;
 
@@ -131,8 +129,8 @@ enum piao prox_piao(enum piao e, enum simbolo s) {
       switch (s) {
         case FRENTE:         return RETO;
         case ESQ:            return G_ESQ;
-        case FRENTE_ESQ:     return G_FRENTE_ESQ;
         case FRENTE_DIR:     return G_FRENTE_DIR;
+        case FRENTE_ESQ:     return G_FRENTE_ESQ;
         case DIR:            return G_DIR;
         case NADA:           return G_ESQ;
       }break;
@@ -170,7 +168,7 @@ enum zig_zag prox_zig_zag(enum zig_zag e, enum simbolo s) {
               return Z_UM;
           }
       case Z_UM:
-          if (dt < 120) return e;
+          if (dt < 160) return e;
           else {
               t0_zig_zag = millis();
               return Z_DOIS;
@@ -182,7 +180,7 @@ enum zig_zag prox_zig_zag(enum zig_zag e, enum simbolo s) {
               return Z_TRES;
           }
       case Z_TRES:
-          if (dt < 120) return e;
+          if (dt < 160) return e;
           else {
               t0_zig_zag = millis();
               return Z_QUATRO;
@@ -191,13 +189,15 @@ enum zig_zag prox_zig_zag(enum zig_zag e, enum simbolo s) {
           if (dt < 120) return e;
           else {
               t0_zig_zag = millis();
+              estrategia = PIAO;
               return Z_ZERO;
           }
   }
   return e;
 }
 
-
+// Esses números são feitos para uso com bateria 4S.
+// Não alterar sem comentar aqui anteriormente.
 void acao_piao(enum piao e) {
   switch (e) {
     case RETO:
@@ -208,22 +208,22 @@ void acao_piao(enum piao e) {
     case G_ESQ:
       {
         Serial.println("GIRANDO PRA ESQUERDA");
-        mover(200, -200);
+        mover(70, -70);
       }break;
     case G_FRENTE_ESQ:
       {
         Serial.println("GIRANDO LEVE PARA ESQUERDA");
-        mover(900, 1023);
+        mover(800, 1023);
       }break;
     case G_FRENTE_DIR:
       {
         Serial.println("GIRANDO LEVE PARA DIREITA");
-        mover(1023, 900);
+        mover(1023, 800);
       }break;
     case G_DIR:
       {
         Serial.println("GIRANDO PRA DIREITA");
-        mover(-200, 200);
+        mover(-70, 70);
       }break;
   }
 }
