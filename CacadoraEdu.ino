@@ -45,9 +45,8 @@ void setup() {
   IR.setLed(2, HIGH, 180);
 }
 
-
+bool resetar = true;
 void loop() {
-  static bool resetar = true;
 
   struct leitura sensores = leitura_sensores();
   mostra_sensores_no_led(sensores);
@@ -163,33 +162,36 @@ enum zig_zag prox_zig_zag(enum zig_zag e, enum simbolo s) {
   const unsigned long dt = millis() - t0_zig_zag;
   switch (e) {
       case Z_ZERO:
-          {
               t0_zig_zag = millis();
               return Z_UM;
-          }
+        
       case Z_UM:
           if (dt < 160) return e;
           else {
               t0_zig_zag = millis();
               return Z_DOIS;
           }
+          
       case Z_DOIS:
           if (dt < 120) return e;
           else {
               t0_zig_zag = millis();
               return Z_TRES;
           }
+
       case Z_TRES:
           if (dt < 160) return e;
           else {
               t0_zig_zag = millis();
               return Z_QUATRO;
           }
+
       case Z_QUATRO:
           if (dt < 120) return e;
           else {
               t0_zig_zag = millis();
               estrategia = PIAO;
+              resetar = true;
               return Z_ZERO;
           }
   }
@@ -228,13 +230,13 @@ void acao_piao(enum piao e) {
   }
 }
 void acao_zig_zag(enum zig_zag e) {
-  const int16_t vel = 200, vel_max = 500;
+  const int16_t vel = 50, vel_max = 100;
 
   switch (e) {
     case Z_ZERO: break;
     case Z_UM: {
         Serial.println("GIRANDO PRA ESQUERDA");
-        mover(-vel, vel);
+        mover(vel, -vel);
       } break;
     case Z_DOIS: {
         Serial.println("ANDANDO RETO");
@@ -242,7 +244,7 @@ void acao_zig_zag(enum zig_zag e) {
       } break;
     case Z_TRES: {
         Serial.println("GIRANDO PRA DIREITA");
-        mover(vel, -vel);
+        mover(-vel, vel);
       } break;
     case Z_QUATRO: {
         Serial.println("ANDANDO RETO");
